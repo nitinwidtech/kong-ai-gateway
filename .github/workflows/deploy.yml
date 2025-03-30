@@ -55,12 +55,12 @@ jobs:
 
       - name: Setup kubectl
         run: |
-          az aks get-credentials --resource-group api-summit --name api-summit-aks
+          az aks get-credentials --resource-group kong-ai-gateway --name kong-aks
 
       - name: Get AOAI Credentials and Create Secret
         run: |
-          AOAI_ENDPOINT=$(az cognitiveservices account show -n api-summit-aoai -g api-summit --query 'properties.endpoint' -o tsv)
-          AOAI_KEY=$(az cognitiveservices account keys list -n api-summit-aoai -g api-summit --query 'key1' -o tsv)
+          AOAI_ENDPOINT=$(az cognitiveservices account show -n kong-aoai -g kong-ai-gateway --query 'properties.endpoint' -o tsv)
+          AOAI_KEY=$(az cognitiveservices account keys list -n kong-aoai -g kong-ai-gateway --query 'key1' -o tsv)
           
           kubectl create secret generic aoai --from-literal=OPENAI_API_KEY=$AOAI_KEY --from-literal=OPENAI_ENDPOINT=https://openai-internal-service
 
@@ -89,7 +89,7 @@ jobs:
   TerraformDestroy:
     name: "Terraform Destroy"
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' # Only run on manual trigger
+    if: always() 
 
     steps:
       - name: Checkout Code
