@@ -33,6 +33,8 @@ resource "azurerm_cognitive_account" "aoai" {
   network_acls {
     default_action = "Deny"
   }
+
+  restore = true # Optional: Set to true if you want to restore the service from a backup
 }
 resource "azurerm_virtual_network" "vnet" {
   name                = var.vnet_name
