@@ -27,11 +27,13 @@ resource "azurerm_cognitive_account" "aoai" {
   kind                = "OpenAI"
   sku_name            = "S0"
 
+  # Required when using network_acls
+  custom_subdomain_name = var.aoai_name 
+
   network_acls {
     default_action = "Deny"
   }
 }
-
 resource "azurerm_virtual_network" "vnet" {
   name                = var.vnet_name
   location            = azurerm_resource_group.rg.location

@@ -26,7 +26,7 @@ jobs:
           terraform_version: latest
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Terraform Plan
         run: terraform plan
@@ -84,6 +84,4 @@ jobs:
           kubectl apply -f k8s/ingress-openai.yaml
           kubectl apply -f k8s/ingress-web.yaml
           kubectl apply -f k8s/kong-plugin-oidc.yaml
-          kubectl apply -f k8s/kong-plugin-rate-limit.yaml
-
-      
+          kubectl apply -f k8s/kong-plugin-rate-limit.yaml   
