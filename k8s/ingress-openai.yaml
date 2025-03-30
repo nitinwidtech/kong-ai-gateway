@@ -9,7 +9,7 @@ spec:
   - protocol: TCP
     port: 443
   type: ExternalName
-  externalName: kong-aoai-test1.openai.azure.com # Get value from $AOAI_ENDPOINT
+  externalName: kong-aoai-test2.openai.azure.com # Get value from $AOAI_ENDPOINT
 ---
 kind: Service
 apiVersion: v1
@@ -29,7 +29,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: kong
     konghq.com/preserve-host: "false"
-    konghq.com/host-header: "kong-aoai-test1.openai.azure.com" # Get value from $AOAI_ENDPOINT
+    konghq.com/host-header: "kong-aoai-test2.openai.azure.com" # Get value from $AOAI_ENDPOINT
     konghq.com/strip-path: "false"
     konghq.com/plugins: openai-rate-limit
 spec:
