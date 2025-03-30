@@ -84,4 +84,34 @@ jobs:
           kubectl apply -f k8s/ingress-openai.yaml
           kubectl apply -f k8s/ingress-web.yaml
           kubectl apply -f k8s/kong-plugin-oidc.yaml
-          kubectl apply -f k8s/kong-plugin-rate-limit.yaml   
+          kubectl apply -f k8s/kong-plugin-rate-limit.yaml
+  
+  TerraformDestroy:
+    name: "Terraform Destroy"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' # Only run on manual trigger
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Terraform Init
+        run: terraform init -upgrade
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

@@ -58,15 +58,3 @@ resource "azurerm_network_security_group" "nsg" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 }
-
-resource "null_resource" "aoai_secret" {
-  provisioner "local-exec" {
-    command = <<EOT
-      AOAI_ENDPOINT=$(az cognitiveservices account show -n ${azurerm_cognitive_account.aoai.name} -g ${azurerm_resource_group.rg.name} --query 'properties.endpoint' -o tsv)
-      AOAI_KEY=$(az cognitiveservices account keys list -n ${azurerm_cognitive_account.aoai.name} -g ${azurerm_resource_group.rg.name} --query 'key1' -o tsv)
-
-      kubectl create secret generic aoai --from-literal=OPENAI_API_KEY=$AOAI_KEY --from-literal=OPENAI_ENDPOINT=https://openai-internal-service
-    EOT
-  }
-}
-
