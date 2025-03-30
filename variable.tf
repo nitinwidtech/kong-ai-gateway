@@ -10,27 +10,27 @@ variable "azure_region" {
 
 variable "resource_group" {
   description = "Name of the Azure Resource Group"
-  default     = "api-summit"
+  default     = "kong-ai-gateway"
 }
 
 variable "aks_name" {
   description = "Name of the Azure Kubernetes Service cluster"
-  default     = "api-summit-aks"
+  default     = "kong-aks"
 }
 
 variable "aoai_name" {
   description = "Azure OpenAI Service name"
-  default     = "api-summit-aoai"
+  default     = "kong-aoai"
 }
 
 variable "vnet_name" {
   description = "Name of the virtual network"
-  default     = "api-summit-vnet"
+  default     = "kong-vnet"
 }
 
 variable "subnet_name" {
   description = "Name of the subnet"
-  default     = "api-summit-subnet"
+  default     = "kong-subnet"
 }
 
 variable "docker_image" {
