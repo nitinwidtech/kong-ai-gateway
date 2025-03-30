@@ -1,3 +1,8 @@
+variable "azure_subscription_id" {
+  description = "Azure Subscription ID"
+  default     = "6e31d38d-26b2-435f-b4bd-010764a59a32"
+}
+
 variable "azure_region" {
   description = "Azure region for deployment"
   default     = "eastus"
