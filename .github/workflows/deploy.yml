@@ -1,0 +1,89 @@
+name: Deploy to Azure & Kubernetes
+
+on:
+  push:
+    branches:
+      - main  # Runs workflow when changes are pushed to main
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  terraform:
+    name: "Terraform Apply"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  kubernetes:
+    name: "Deploy Kubernetes Resources"
+    needs: terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup kubectl
+        run: |
+          az aks get-credentials --resource-group api-summit --name api-summit-aks
+
+      - name: Get AOAI Credentials and Create Secret
+        run: |
+          AOAI_ENDPOINT=$(az cognitiveservices account show -n api-summit-aoai -g api-summit --query 'properties.endpoint' -o tsv)
+          AOAI_KEY=$(az cognitiveservices account keys list -n api-summit-aoai -g api-summit --query 'key1' -o tsv)
+          
+          kubectl create secret generic aoai --from-literal=OPENAI_API_KEY=$AOAI_KEY --from-literal=OPENAI_ENDPOINT=https://openai-internal-service
+
+      - name: Deploy Kong
+        run: |
+          kubectl create namespace kong
+          helm repo add kong https://charts.konghq.com
+          helm repo update
+          kubectl create secret tls konnect-client-tls -n kong \
+            --cert=./tls.crt --key=./tls.key
+          helm install kong kong/ingress -n kong --values k8s/values.yaml
+  
+      - name: Deploy Cert Manager
+        run: |
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.4/cert-manager.yaml
+  
+
+      - name: Apply Kubernetes Resources
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/ingress-openai.yaml
+          kubectl apply -f k8s/ingress-web.yaml
+          kubectl apply -f k8s/kong-plugin-oidc.yaml
+          kubectl apply -f k8s/kong-plugin-rate-limit.yaml
+
+      

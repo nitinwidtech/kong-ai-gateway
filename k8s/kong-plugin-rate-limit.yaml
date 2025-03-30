@@ -1,0 +1,11 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: openai-rate-limit
+  annotations:
+    kubernetes.io/ingress.class: kong
+config:
+  minute: 2
+  policy: local
+  error_message: "Stop spending our budget on OpenAI!"
+plugin: rate-limiting
